@@ -4,7 +4,10 @@ export type { CanvasToolCall, CanvasInfo, CanvasContext } from "@toonflow/tools-
 const nodeId = z.string().min(1).max(256);
 const position = z.strictObject({ x: z.number().finite(), y: z.number().finite() });
 const canvasId = nodeId.optional();
-const cursor = z.string().min(1).max(4096).optional();
+const cursor = z.string().max(4096).nullish()
+  .describe('分页凭证，不是页码。首次查询省略 cursor（也可传 null 或空字符串）；仅在 hasMore 为 true 时原样使用返回的 nextCursor。禁止自行构造 "initial"、"RESTART" 等值；游标错误时删除 cursor 后重新查询，不要重复失败参数。')
+  // ACT: 兼容 Agent 将第一页误写为 "0"；真正的非空分页凭证仍须严格校验，不能静默重置失效分页。
+  .transform(value => value == null || !value.trim() || value === "0" ? undefined : value);
 const nodeIds = z.array(nodeId).min(1).max(20);
 
 export const canvasSchemas = {

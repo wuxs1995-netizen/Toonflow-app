@@ -167,9 +167,9 @@ export function createCanvasQueries(source: {
     let offset = 0;
     if (cursor) {
       let page: unknown;
-      try { page = JSON.parse(cursor); } catch { throw new Error("分页游标无效，请重新查询"); }
+      try { page = JSON.parse(cursor); } catch { throw new Error("分页游标无效：请删除 cursor 字段后重新查询。cursor 不是页码，只能原样使用上次返回的 nextCursor；不要自行构造或重复失败参数。"); }
       if (!Array.isArray(page) || page.length !== 6 || page[0] !== sessionId || page[1] !== canvasId || page[2] !== revision || page[3] !== key || !Number.isSafeInteger(page[4]) || page[4] < 0 || page[5] !== name) {
-        throw new Error("画布结构或查询参数已变化，分页游标失效，请重新查询");
+        throw new Error("画布结构或查询参数已变化，或 cursor 不是有效的分页凭证：请删除 cursor 字段后重新查询；继续分页只能原样使用新返回的 nextCursor，不要重复失败参数。");
       }
       offset = page[4];
     }
